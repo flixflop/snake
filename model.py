@@ -9,10 +9,18 @@ class GameState:
         # We are using a tuple to store the game coordinates
         # Maybe in the futre, we can make this a point, so we can define math operations like
         # subtraction propertly.
+        # Another todo could be to use a double-ended queue as a data structure.
         self.grid_size = grid_size
         self.snake = [snake_start]
         self.snack = self.generate_snack()
         self.direction = None
+        self.score = 0
+        self.movements = {
+            "Left" : (-1, 0),
+            "Right" : (1, 0),
+            "Up" : (0, -1),
+            "Down" : (0, 1)
+        }
 
     def generate_snack(self):
         while True:
@@ -21,23 +29,27 @@ class GameState:
             snack = (snack_x, snack_y)
             if snack not in self.snake:
                 return snack
+            
+    def set_direction(self, direction):
+        if direction == "Left" and self.direction != "Right":
+            self.direction = direction
+        elif direction == "Right" and self.direction != "Left":
+            self.direction = direction
+        if direction == "Up" and self.direction != "Down":
+            self.direction = direction
+        if direction == "Down" and self.direction != "Up":
+            self.direction = direction   
 
     def move_snake(self):
         if self.direction:
             head_x, head_y = self.snake[0]
-            if self.direction == "Left":
-                head_x -= 1
-            elif self.direction == "Right":
-                head_x += 1
-            elif self.direction == "Down":
-                head_y += 1
-            elif self.direction == "Up":
-                head_y -= 1
-            new_head = (head_x, head_y)
+            dx, dy = self.movements[self.direction]
+            new_head = (head_x + dx, head_y + dy)
 
             # snack eating & movement logic
             if new_head == self.snack:
                 self.snake = [new_head] + self.snake
+                self.score += 1
                 self.snack = self.generate_snack()
             else:
                 self.snake = [new_head] + self.snake[:-1]
